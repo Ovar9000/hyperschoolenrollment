@@ -20,9 +20,10 @@
 		"lint": "prettier --check .",
 		"format": "prettier --write .",
 		"db:generate": "drizzle-kit generate",
-		"db:migrate": "drizzle-kit migrate",
-		"db:seed": "node scripts/seed.mjs",
-		"db:studio": "drizzle-kit studio"
+		"db:migrate": "node --env-file-if-exists=.env scripts/migrate.mjs",
+		"db:seed": "node --env-file-if-exists=.env scripts/seed.mjs",
+		"db:studio": "drizzle-kit studio",
+		"staff": "node --env-file-if-exists=.env --experimental-strip-types --disable-warning=ExperimentalWarning scripts/staff.ts"
 	},
 	"imports": {
 		"#lib": "./src/lib/index.ts",

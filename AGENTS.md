@@ -93,6 +93,14 @@ More rules:
 - **No new runtime dependency in client code without a written reason in the PR.** Banned on the client: UI kits, icon fonts,
   CSS frameworks, date libraries (use `Intl` and ISO strings), lodash, axios (use `fetch`), state libraries, analytics SDKs.
 - **No web fonts.** Use the system font stack in `src/app.css`. Icons are inline SVG.
+- **Design system lives in `src/app.css`** (one cached file for all pages): brand tokens sampled from the
+  college seal (`--brand` green, `--gold`, `--teal`), light + dark mode, mobile-first breakpoints at
+  `40rem` and `64rem`. Reuse its classes (`.card`, `.btn`, `.form-section`, `.field-grid`, `.choice`)
+  before adding new CSS. Never hard-code colours in components; use the tokens.
+- **No inline `style="..."` in markup.** The CSP blocks `<style>`/script injection; keep styling in
+  CSS classes (use `class={{ ... }}` for state, `<progress>` for bars).
+- **Images:** import from `src/lib/assets/` (Vite hashes them for year-long caching; inlining is
+  disabled), WebP, with explicit `width`/`height` and a `1x, 2x` `srcset`. Keep each under ~25 KB.
 - **Native controls only:** `<input inputmode="numeric" pattern="[0-9]{12}">` for LRN (never `type="number"`), `<input type="date">`,
   `<select>`, `<input type="file" accept="image/*">`. Don't add `capture=`; it blocks picking an existing photo.
 - **Images are compressed on the phone before upload** with `#lib/compress-image.ts` (it falls back to JPEG on Safari, which can't
@@ -109,8 +117,10 @@ More rules:
 
 Full rationale is in [docs/architecture.md](docs/architecture.md).
 
-- **Domain prefixes are module boundaries:** `core_` (person identity, shared by every future system), `ref_` (reference data),
-  `enr_` (enrollment), `sys_` (event log, audit log). A future system adds its own prefix (`grd_`, `fin_`, `lib_`...).
+- **Domain prefixes are module boundaries:** `core_` (person identity: students, faculty and staff, shared by every
+  system), `ref_` (programs, terms, subjects, curricula), `rec_` (the student record: student number, status),
+  `enr_` (applications, sections, class offerings, class seats), `sys_` (staff accounts, sessions, event log, audit log).
+  A future system adds its own prefix (`grd_`, `fin_`, `lib_`...). Scope is fixed in [docs/scope.md](docs/scope.md).
   A module writes **only its own tables**. It reads others' tables, or better, listens to their events.
 - **Primary keys are UUIDv7 text** (`#lib/server/id.ts`). Never use LRN, student number or names as keys. External IDs go in
   `core_person_identifier (scheme, value)`.
@@ -124,7 +134,23 @@ Full rationale is in [docs/architecture.md](docs/architecture.md).
 - Names follow PSA format: `last_name`, `first_name`, `middle_name`, `suffix`, all separate. Dates are ISO `YYYY-MM-DD`. Timestamps are UTC
   milliseconds. Money is integer centavos. Addresses use PSGC codes.
 - Schema changes: edit `src/lib/server/db/schema/*.ts` → `npm run db:generate` → commit the SQL in `drizzle/`. Never edit an applied
-  migration. Migrations run automatically at server start.
+  migration. Migrations run automatically at server start, or with `npm run db:migrate`.
+- **Never use `drizzle-kit migrate` or `drizzle-kit push`.** Drizzle runs migrations in a transaction where SQLite ignores
+  `PRAGMA foreign_keys`, so any table rebuild (changing a column) fails on a database that has rows. Our runner
+  (`runMigrations()` / `scripts/migrate.mjs`) switches FKs off around it and runs `foreign_key_check` after.
+- **Test every migration against a copy of real data** (`new Database(src).backup(copy)` then migrate the copy) before it
+  reaches the campus server. An empty test database hides exactly the failures that matter.
+
+## 4b. Staff area (`/staff`) rules
+
+- Public pages live in `src/routes/(public)/` (student header/footer, mobile-first, `app.css` only). Staff pages live in
+  `src/routes/staff/` with their own PC-first layout and `staff.css`, which students never download.
+- `hooks.server.ts` already redirects signed-out requests and forces temporary-password changes. **Every staff `load` and
+  action must still call `requireStaff(locals, ...roles)` first.** Hooks are not an authorization check for data.
+- Roles: `ADMIN` (everything), `REGISTRAR`, `CASHIER`, `DEAN`, `FACULTY`. Grant the smallest set that does the job.
+- **Any staff page that shows one student's personal data writes an `audit(tx, { action: 'READ', … })` row.**
+- Staff accounts are created from the server console with `npm run staff -- add …`; passwords use scrypt
+  (`#lib/server/auth/password.ts`). Never log, store or display a plaintext password.
 
 ## 5. Privacy (RA 10173) — non-negotiable
 

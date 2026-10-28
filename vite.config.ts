@@ -3,6 +3,9 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+	// Never inline images as data: URIs. Hashed files are cached for a year (and by the service
+	// worker); inlined bytes would be re-downloaded inside every HTML/JS response.
+	build: { assetsInlineLimit: 0 },
 	plugins: [
 		sveltekit({
 			compilerOptions: {
@@ -23,6 +26,9 @@ export default defineConfig({
 					'default-src': ['self'],
 					'script-src': ['self'],
 					'style-src': ['self'],
+					// SvelteKit's screen-reader route announcer uses a style attribute. Attributes can't
+					// run code; <style> elements and scripts stay locked to 'self' + nonces.
+					'style-src-attr': ['unsafe-inline'],
 					'img-src': ['self', 'data:', 'blob:'],
 					'connect-src': ['self'],
 					'object-src': ['none'],

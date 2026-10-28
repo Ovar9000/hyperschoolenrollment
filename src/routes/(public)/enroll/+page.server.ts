@@ -9,7 +9,7 @@ import {
 	program,
 	term
 } from '#lib/server/db/schema/index.ts';
-import { reserveFirstOpenBlock } from '#lib/server/enrollment/reserve-seat.ts';
+import { enrollInFirstOpenBlock } from '#lib/server/enrollment/reserve-seat.ts';
 import { audit, emitEvent } from '#lib/server/events.ts';
 import { refCode, uuidv7 } from '#lib/server/id.ts';
 import { ageOn, isLrn, normalizeMobile, normalizeName, todayInManila } from '#lib/validation.ts';
@@ -107,11 +107,6 @@ export const actions = {
 						.run();
 					tx.insert(personIdentifier).values({ scheme: 'LRN', value: values.lrn, personId }).run();
 
-					// Freshman intake: year level 1. Block students get a seat now (one tap);
-					// if every block is full they are queued for the Registrar (sectionId null).
-					const sectionId =
-						mode === 'BLOCK' ? reserveFirstOpenBlock(tx, t.id, prog!.code, 1) : null;
-
 					const applicationId = uuidv7();
 					const code = refCode();
 					tx.insert(application)
@@ -122,10 +117,22 @@ export const actions = {
 							termId: t.id,
 							programCode: prog!.code,
 							yearLevel: 1,
-							mode,
-							sectionId
+							mode
 						})
 						.run();
+
+					// Freshman intake: year level 1. Block students get a section AND all its classes
+					// now (one tap); if every block is full they are queued for the Registrar.
+					const sectionId =
+						mode === 'BLOCK'
+							? enrollInFirstOpenBlock(tx, applicationId, t.id, prog!.code, 1)
+							: null;
+					if (sectionId) {
+						tx.update(application)
+							.set({ sectionId })
+							.where(eq(application.id, applicationId))
+							.run();
+					}
 
 					audit(tx, {
 						actor: `student:${personId}`,

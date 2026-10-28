@@ -21,8 +21,10 @@ export const person = sqliteTable('core_person', {
 	firstName: text('first_name').notNull(),
 	middleName: text('middle_name'),
 	suffix: text('suffix'),
-	sexAtBirth: text('sex_at_birth', { enum: ['M', 'F'] }).notNull(),
-	birthdate: text('birthdate').notNull(), // ISO YYYY-MM-DD
+	// Required by the student intake form; optional at DB level because faculty and staff are
+	// people too and we don't collect these for them.
+	sexAtBirth: text('sex_at_birth', { enum: ['M', 'F'] }),
+	birthdate: text('birthdate'), // ISO YYYY-MM-DD
 	mobile: text('mobile'),
 	email: text('email'),
 	...timestamps

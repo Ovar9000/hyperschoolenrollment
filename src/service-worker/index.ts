@@ -10,8 +10,11 @@ const CACHE = `cache-${version}`;
 // (`resolve()` from $app/paths only accepts route paths, not build-file paths.)
 const toPath = (p: string) => new URL(p, self.registration.scope).pathname;
 const OFFLINE = toPath('offline');
-const PRECACHE = [...immutable, ...assets, ...prerendered].map((f) => toPath(f.path));
-const PRECACHED = new Set(PRECACHE);
+// Hashed build files and static assets never change under the same URL: safe to serve cache-first.
+const STATIC = new Set([...immutable, ...assets].map((f) => toPath(f.path)));
+// Prerendered HTML keeps its URL across deploys, so it is network-first (cache = offline fallback).
+const PAGES = new Set(prerendered.map((f) => toPath(f.path)));
+const PRECACHE = [...STATIC, ...PAGES];
 
 self.addEventListener('install', (event) => {
 	event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(PRECACHE)));
@@ -31,15 +34,19 @@ self.addEventListener('fetch', (event) => {
 	const url = new URL(request.url);
 	if (url.origin !== self.location.origin) return;
 
-	if (PRECACHED.has(url.pathname)) {
+	if (STATIC.has(url.pathname)) {
 		event.respondWith(caches.match(url.pathname).then((hit) => hit ?? fetch(request)));
 		return;
 	}
 
-	// Network only for everything else; show the offline page if a navigation fails.
-	if (request.mode === 'navigate') {
+	// Pages: always try the network. Offline, fall back to the cached copy of a public page,
+	// then to the offline page. Pages with personal data are never in the cache.
+	if (request.mode === 'navigate' || PAGES.has(url.pathname)) {
 		event.respondWith(
-			fetch(request).catch(async () => (await caches.match(OFFLINE)) ?? Response.error())
+			fetch(request).catch(
+				async () =>
+					(await caches.match(url.pathname)) ?? (await caches.match(OFFLINE)) ?? Response.error()
+			)
 		);
 	}
 });

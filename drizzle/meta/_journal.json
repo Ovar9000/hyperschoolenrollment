@@ -15,6 +15,13 @@
       "when": 1793180051114,
       "tag": "0001_append_only_logs",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1793186248474,
+      "tag": "0002_records_backbone",
+      "breakpoints": true
     }
   ]
 }

@@ -80,6 +80,11 @@ const RULES = [
 	],
 	[/data-sveltekit-[a-z-]+="off"/, 'svelte', '`="off"` → `="false"`'],
 	[
+		/\sstyle(:[\w-]+)?=/,
+		'svelte',
+		'inline `style=` / `style:` → a CSS class in app.css or staff.css (AGENTS.md §3)'
+	],
+	[
 		/\scapture=/,
 		'svelte',
 		'`capture=` blocks gallery picking on Android; remove it (AGENTS.md §3)'

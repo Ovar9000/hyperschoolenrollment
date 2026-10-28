@@ -20,6 +20,6 @@ export const variables = defineEnvVars({
 		description: 'Display name of the college.',
 		public: true,
 		static: true,
-		schema: optional('San Pascual College')
+		schema: optional('San Pascual Polytechnic College')
 	}
 });

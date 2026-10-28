@@ -7,9 +7,12 @@ phones on congested mobile data and one ₱8k mini PC in the server room.
 
 | Measured (production build, gzipped) | JS      | CSS    | HTML    |
 | ------------------------------------ | ------- | ------ | ------- |
-| `/` landing, `/privacy`, `/offline`  | 0 KB    | 0.6 KB | ~0.8 KB |
-| `/enroll` (the form)                 | 39.6 KB | 0.7 KB | 1.1 KB  |
-| `/enroll/done`                       | 0 KB    | 0.7 KB | 0.7 KB  |
+| `/` landing, `/privacy`, `/offline`  | 0 KB    | 2.8 KB | ~1.3 KB |
+| `/enroll` (the form)                 | 42.8 KB | 2.8 KB | 1.5 KB  |
+| `/enroll/done`                       | 0 KB    | 2.8 KB | 1.1 KB  |
+
+The CSS is one shared file, downloaded once and cached. The college seal is 1.8 KB in the header
+(5.5 KB on high-DPI screens) and 7.6–20 KB on the landing page.
 
 `npm run budget` re-measures these and fails above 50 KB JS / 15 KB CSS per route.
 The form works with JavaScript disabled; JS only adds draft saving and no-reload submits.
@@ -36,7 +39,16 @@ The first request runs migrations (creates `data/enrollment.db`). Then seed demo
 npm run db:seed
 ```
 
-Open http://localhost:5173/enroll.
+Open http://localhost:5173/enroll for the student side.
+
+For the staff side, create the first admin account from the server console. A one-time temporary
+password is printed; it must be changed at first sign-in:
+
+```bash
+npm run staff -- add --username admin --name "Your Name" --roles ADMIN
+```
+
+Then sign in at http://localhost:5173/staff.
 
 ## Scripts
 
@@ -46,7 +58,9 @@ Open http://localhost:5173/enroll.
 | `npm run check`       | `svelte-check` + `scripts/guard-svelte5.mjs` (bans Svelte 4 / Kit 2 code) |
 | `npm run budget`      | Boots the build and measures real per-route JS/CSS                        |
 | `npm run db:generate` | Create a migration after editing `src/lib/server/db/schema/*.ts`          |
-| `npm run db:seed`     | Demo term, programs and block sections                                    |
+| `npm run db:migrate`  | Apply migrations without starting the server (FK-safe runner)             |
+| `npm run db:seed`     | Demo term, subjects, curricula, sections, classes (idempotent)            |
+| `npm run staff -- …`  | Staff accounts: `add`, `reset`, `disable`, `list`                         |
 | `npm start`           | Run the production build (`node build`)                                   |
 
 ## Read these first
@@ -54,6 +68,8 @@ Open http://localhost:5173/enroll.
 - **[AGENTS.md](AGENTS.md):** hard rules for humans and AI agents (Svelte 5 runes only, SvelteKit 3
   APIs, performance budget, data rules). Claude Code loads it automatically via `.claude/CLAUDE.md`;
   the official Svelte MCP server and skills are preconfigured in `.mcp.json` and `.claude/`.
+- **[docs/scope.md](docs/scope.md):** what the Student Records System is, the phases, and the
+  explicit "won't build" list. Check feature requests against it.
 - **[docs/architecture.md](docs/architecture.md):** how enrollment becomes the identity intake for
   future school-wide systems (domains, identifiers, event feed, API).
 
@@ -73,14 +89,24 @@ plain-HTTP testing on your laptop, use `npm run dev` or `npm run preview`.
 
 ## Status
 
-**Done:** the mobile intake form (consent + guardian attestation, LRN, PSA name, one-tap block
-seat), seat locking (tested: 12 concurrent submits for 2 seats → exactly 2 seated), event feed and
-person API, append-only audit/event logs, service worker (offline page + asset precache).
+See [docs/scope.md](docs/scope.md) for the full phase plan.
 
-**Next (Phase 1 per research):** student login for returning students and status lookup, document
-upload (use `#lib/compress-image.ts`), PhilSys QR pre-fill, Registrar/Cashier screens (document
-hold, OR encoding, FHE tagging), COR print page, CHED EL / UniFAST exports.
+**Done (Phase 0 + 1a):**
+
+- Student intake: mobile form, consent + guardian attestation, LRN dedupe, one-tap block enrollment
+  into the section **and all its classes** (tested: 12 concurrent submits against 2 seats and a
+  1-seat class → exact counts, no half-taken blocks).
+- Records backbone: subjects + prerequisites, curriculum versions, class offerings with schedule,
+  room, professor and seat caps, student record table, staff accounts with roles.
+- Staff area (`/staff`, PC-first): sign-in with scrypt + server sessions + lockout, forced
+  temporary-password change, dashboard, application queue with search, application detail
+  (audit-logged), classes & slots.
+- Event feed + person API, append-only audit/event logs, service worker.
+
+**Next (Phase 1b, enrollment processing):** requirements/hardcopy checklist, section assignment for
+irregular and unseated students, status changes with history, fees + assessment (RA 10931 FHE),
+Cashier OR encoding → OFFICIAL + student number, printable COR, student status lookup.
 
 **Known limits:** client IPs in the audit log show `127.0.0.1` for Cloudflare Tunnel traffic until
 Caddy is configured to trust `CF-Connecting-IP`. Dev-only tooling (drizzle-kit) has `npm audit`
-advisories that don't ship to production.
+advisories that don't ship to production. Staff management is console-only until the Admin screens.

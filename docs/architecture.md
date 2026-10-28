@@ -44,13 +44,14 @@ flowchart LR
   E -- read by --> future
 ```
 
-| Prefix  | Owner                    | Contains                                                          |
-| ------- | ------------------------ | ----------------------------------------------------------------- |
-| `core_` | Registrar (data steward) | Who a person is: PSA name, sex, birthdate, contacts, IDs, consent |
-| `ref_`  | Registrar                | Programs (COPC, normal years), terms                              |
-| `enr_`  | Enrollment module        | Applications, sections, uploaded document metadata                |
-| `sys_`  | Platform                 | Event log (outbox), append-only audit log                         |
-| `grd_`… | Future modules           | Their own facts, keyed by `core_person.id`                        |
+| Prefix  | Owner                    | Contains                                                                                                 |
+| ------- | ------------------------ | -------------------------------------------------------------------------------------------------------- |
+| `core_` | Registrar (data steward) | Who a person is (students, faculty, staff): PSA name, contacts, IDs, consent                             |
+| `ref_`  | Registrar                | Programs, terms, subjects + prerequisites, curriculum versions                                           |
+| `rec_`  | Registrar                | The student record: student number, program, curriculum, status                                          |
+| `enr_`  | Enrollment module        | Applications, block sections, class offerings (schedule, room, professor, seats), class seats, documents |
+| `sys_`  | Platform                 | Staff accounts + sessions, event log (outbox), append-only audit log                                     |
+| `grd_`… | Future modules           | Their own facts, keyed by `core_person.id`                                                               |
 
 **Ownership rule:** a module writes only its own prefix. It may read `core_`/`ref_`, but should
 prefer reacting to events over querying another module's tables.

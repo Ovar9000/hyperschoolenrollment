@@ -3,7 +3,10 @@
 declare global {
 	namespace App {
 		// interface Error {}
-		// interface Locals {}
+		interface Locals {
+			/** Signed-in staff member on /staff routes; always null elsewhere. */
+			user: import('#lib/server/auth/session.ts').StaffUser | null;
+		}
 		// interface PageData {}
 		// interface PageState {}
 		// interface Platform {}

@@ -6,8 +6,8 @@
 </script>
 
 <svelte:head>
-	<!-- A URL, not an imported asset: Vite would inline it as a data URI into every HTML response. -->
-	<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+	<link rel="icon" href="/favicon.png" type="image/png" />
+	<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 </svelte:head>
 
 {@render children()}
