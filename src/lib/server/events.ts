@@ -17,6 +17,37 @@ export interface EventCatalog {
 		mode: 'BLOCK' | 'IRREGULAR';
 		sectionId: string | null;
 	};
+	// `by` is the staff sys_user.id that made the change (an internal ID, not personal data).
+	'enrollment.application.accepted.v1': { applicationId: string; by: string };
+	'enrollment.section.assigned.v1': {
+		applicationId: string;
+		sectionId: string;
+		previousSectionId: string | null;
+		by: string;
+	};
+	'enrollment.requirement.updated.v1': {
+		applicationId: string;
+		kind: string;
+		received: boolean;
+		by: string;
+	};
+	'enrollment.application.assessed.v1': {
+		applicationId: string;
+		fheStatus: string;
+		netDueCentavos: number;
+		by: string;
+	};
+	'enrollment.assessment.reverted.v1': { applicationId: string; by: string };
+	'enrollment.application.officially_enrolled.v1': {
+		applicationId: string;
+		personId: string;
+		termId: string;
+		studentNo: string;
+		orNumber: string | null;
+		by: string;
+	};
+	'enrollment.application.cancelled.v1': { applicationId: string; by: string };
+	'records.student.admitted.v1': { personId: string; studentNo: string; programCode: string };
 }
 
 /** Must be called with the transaction that performs the change, so both commit or neither does. */

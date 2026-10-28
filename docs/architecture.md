@@ -125,13 +125,20 @@ consumers (an n8n workflow, a Go service, a data warehouse) can parse it without
 
 ### Current event catalog
 
-| Type                                  | Emitted when                      | Data                                                            |
-| ------------------------------------- | --------------------------------- | --------------------------------------------------------------- |
-| `core.person.registered.v1`           | A new person record is created    | `personId`                                                      |
-| `enrollment.application.submitted.v1` | A student submits the mobile form | `applicationId, personId, termId, programCode, mode, sectionId` |
+| Type                                            | Emitted when                                | Data                                                            |
+| ----------------------------------------------- | ------------------------------------------- | --------------------------------------------------------------- |
+| `core.person.registered.v1`                     | A new person record is created              | `personId`                                                      |
+| `enrollment.application.submitted.v1`           | A student submits the mobile form           | `applicationId, personId, termId, programCode, mode, sectionId` |
+| `enrollment.application.accepted.v1`            | Registrar accepts → PROVISIONAL             | `applicationId, by`                                             |
+| `enrollment.section.assigned.v1`                | Registrar places/moves a student            | `applicationId, sectionId, previousSectionId, by`               |
+| `enrollment.requirement.updated.v1`             | An original document is (un)marked          | `applicationId, kind, received, by`                             |
+| `enrollment.application.assessed.v1`            | Assessment issued → ASSESSED                | `applicationId, fheStatus, netDueCentavos, by`                  |
+| `enrollment.assessment.reverted.v1`             | Unpaid assessment undone                    | `applicationId, by`                                             |
+| `records.student.admitted.v1`                   | First student number issued                 | `personId, studentNo, programCode`                              |
+| `enrollment.application.officially_enrolled.v1` | Cashier records OR / confirms ₱0 → OFFICIAL | `applicationId, personId, termId, studentNo, orNumber, by`      |
+| `enrollment.application.cancelled.v1`           | Registrar cancels; seats released           | `applicationId, by`                                             |
 
-Planned: `enrollment.application.assessed.v1`, `enrollment.application.officially_enrolled.v1`,
-`enrollment.document.hardcopy_verified.v1`, `grades.final_grade.posted.v1`.
+`by` is a staff `sys_user.id` (internal ID, not personal data). Planned: `grades.final_grade.posted.v1`.
 
 The source of truth for payload types is `EventCatalog` in `src/lib/server/events.ts`.
 

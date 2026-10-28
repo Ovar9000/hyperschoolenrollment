@@ -119,7 +119,8 @@ Full rationale is in [docs/architecture.md](docs/architecture.md).
 
 - **Domain prefixes are module boundaries:** `core_` (person identity: students, faculty and staff, shared by every
   system), `ref_` (programs, terms, subjects, curricula), `rec_` (the student record: student number, status),
-  `enr_` (applications, sections, class offerings, class seats), `sys_` (staff accounts, sessions, event log, audit log).
+  `enr_` (applications, sections, class offerings, class seats, original-document checklist), `fin_` (fee schedule,
+  assessments, official receipts; not accounting), `sys_` (staff accounts, sessions, event log, audit log).
   A future system adds its own prefix (`grd_`, `fin_`, `lib_`...). Scope is fixed in [docs/scope.md](docs/scope.md).
   A module writes **only its own tables**. It reads others' tables, or better, listens to their events.
 - **Primary keys are UUIDv7 text** (`#lib/server/id.ts`). Never use LRN, student number or names as keys. External IDs go in
@@ -142,6 +143,12 @@ Full rationale is in [docs/architecture.md](docs/architecture.md).
   reaches the campus server. An empty test database hides exactly the failures that matter.
 
 ## 4b. Staff area (`/staff`) rules
+
+- **Every application status change goes through `#lib/server/enrollment/workflow.ts`**, run with `runStep()` (BEGIN
+  IMMEDIATE). Never `UPDATE enr_application SET status` anywhere else. Each workflow function guards its transition
+  with a conditional UPDATE, releases/claims seats, and writes the event + audit row in the same transaction.
+- Fees are integer centavos; an assessment is a snapshot (`fin_assessment` + lines) that later fee changes never alter.
+- `npm run test:e2e` drives the whole lifecycle over HTTP; extend it whenever you add a workflow step.
 
 - Public pages live in `src/routes/(public)/` (student header/footer, mobile-first, `app.css` only). Staff pages live in
   `src/routes/staff/` with their own PC-first layout and `staff.css`, which students never download.

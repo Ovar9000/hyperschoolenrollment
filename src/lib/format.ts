@@ -25,3 +25,8 @@ export const STATUS_LABELS: Record<string, string> = {
 	OFFICIAL: 'Official',
 	CANCELLED: 'Cancelled'
 };
+
+const peso = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' });
+
+/** Integer centavos → "₱1,234.50". */
+export const formatPeso = (centavos: number) => peso.format(centavos / 100);

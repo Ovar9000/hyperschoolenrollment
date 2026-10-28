@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url';
 import { gzipSync } from 'node:zlib';
 
 const BUDGET = { js: 50 * 1024, css: 15 * 1024 };
-const ROUTES = ['/', '/privacy', '/offline', '/enroll', '/enroll/done?ref=ABCD2345'];
+const ROUTES = ['/', '/privacy', '/offline', '/enroll', '/enroll/done?ref=ABCD2345', '/status'];
 const PORT = 4179;
 const ORIGIN = `http://127.0.0.1:${PORT}`;
 const ROOT = fileURLToPath(new URL('..', import.meta.url));

@@ -21,6 +21,8 @@
 			<p class="hint">Screenshot this page. You'll need it at the Registrar and the Cashier.</p>
 		</div>
 
+		<p><a class="btn btn-ghost" href="/status">Check your status anytime</a></p>
+
 		<div class="card">
 			<h2>Next steps</h2>
 			<ol class="steps">

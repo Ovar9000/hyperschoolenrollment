@@ -401,6 +401,135 @@ dl.kv dd {
 	font-size: 0.8125rem;
 }
 
+/* Workflow */
+.flash {
+	background: var(--brand-soft);
+	color: var(--brand);
+	border-radius: var(--radius-sm);
+	padding: 0.75rem 1rem;
+	font-weight: 600;
+}
+
+.warn {
+	color: var(--gold-ink);
+	background: var(--gold-soft);
+	border-radius: var(--radius-sm);
+	padding: 0.5rem 0.75rem;
+}
+
+.next-step {
+	border-left: 4px solid var(--brand);
+}
+
+.next-step form {
+	margin-top: 0.75rem;
+}
+
+.panel-head {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 0.75rem;
+}
+
+.panel-head h2 {
+	margin: 0;
+}
+
+.inline-form {
+	display: flex;
+	gap: 0.5rem;
+	align-items: center;
+}
+
+.inline-form select {
+	min-height: 36px;
+	padding: 0.25rem 0.5rem;
+	width: auto;
+	font-size: 0.875rem;
+}
+
+table.data.lines {
+	margin: 0.5rem 0;
+}
+
+.fhe-form fieldset {
+	display: grid;
+	gap: 0.5rem;
+	margin-bottom: 0.75rem;
+}
+
+.fhe-form legend {
+	font-weight: 700;
+	margin-bottom: 0.25rem;
+}
+
+.fhe-option {
+	display: grid;
+	grid-template-columns: auto 1fr auto;
+	gap: 0.75rem;
+	align-items: center;
+	padding: 0.625rem 0.875rem;
+	border: 1px solid var(--line-strong);
+	border-radius: var(--radius-sm);
+	cursor: pointer;
+	font-weight: 400;
+}
+
+.fhe-option:has(input:checked) {
+	border-color: var(--brand);
+	background: var(--brand-soft);
+}
+
+dd.due {
+	font-size: 1.25rem;
+	color: var(--brand);
+}
+
+.req-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	gap: 0.5rem;
+}
+
+.req-list li {
+	display: flex;
+	justify-content: space-between;
+	gap: 0.75rem;
+	align-items: center;
+	padding: 0.5rem 0.75rem;
+	border-radius: var(--radius-sm);
+	background: var(--page);
+	font-size: 0.875rem;
+}
+
+.req-list li.done {
+	background: var(--brand-soft);
+}
+
+.req-list li div {
+	display: grid;
+}
+
+.btn-sm.danger {
+	border-color: var(--danger);
+	color: var(--danger);
+}
+
+.btn-sm.danger:hover {
+	background: var(--danger-soft);
+}
+
+details.danger-zone summary {
+	cursor: pointer;
+	font-weight: 600;
+	color: var(--danger);
+}
+
 /* Login */
 .login-wrap {
 	min-height: 100dvh;
@@ -436,4 +565,8 @@ dl.kv dd {
 	.detail-grid {
 		grid-template-columns: minmax(0, 1fr);
 	}
+}
+
+table.data tr.selected {
+	background: var(--brand-soft);
 }

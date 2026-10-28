@@ -145,6 +145,26 @@ db.transaction(() => {
 		});
 	}
 
+	// Sample fee schedule (centavos). FHE (RA 10931) covers tuition and the listed school fees;
+	// student-organization fees are not covered, so FHE students still owe a small amount.
+	const fees = [
+		['TUITION', 'Tuition', 'PER_UNIT', 20000, 1, null],
+		['REG', 'Registration', 'FIXED', 15000, 1, null],
+		['LIB', 'Library', 'FIXED', 10000, 1, null],
+		['ATH', 'Athletic', 'FIXED', 10000, 1, null],
+		['MED', 'Medical and dental', 'FIXED', 5000, 1, null],
+		['ID', 'School ID', 'FIXED', 10000, 1, null],
+		['CLAB', 'Computer laboratory', 'FIXED', 30000, 1, 'BSIT'],
+		['SC', 'Student council', 'FIXED', 5000, 0, null]
+	];
+	const feeStmt = db.prepare(
+		`INSERT OR IGNORE INTO fin_fee (id, term_id, program_code, code, label, basis, amount_centavos, fhe_covered, sort)
+		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+	);
+	fees.forEach(([code, label, basis, amount, covered, prog], i) =>
+		feeStmt.run(fixedId(500 + i), TERM, prog, code, label, basis, amount, covered, i)
+	);
+
 	// Backfill: block students seated before classes existed get their class seats now.
 	db.prepare(
 		`INSERT OR IGNORE INTO enr_class_enrollment (application_id, class_id, status, enrolled_at)

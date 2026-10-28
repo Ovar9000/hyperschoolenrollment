@@ -9,6 +9,7 @@ import {
 	text,
 	unique
 } from 'drizzle-orm/sqlite-core';
+import { REQUIREMENTS, type RequirementKind } from '../../../enrollment.ts';
 import { uuidv7 } from '../../id.ts';
 import { person } from './core.ts';
 import { program, subject, term } from './ref.ts';
@@ -68,6 +69,7 @@ export const application = sqliteTable(
 		})
 			.notNull()
 			.default('PENDING'),
+		cancelReason: text('cancel_reason'),
 		submittedAt: integer('submitted_at', { mode: 'timestamp_ms' })
 			.notNull()
 			.$defaultFn(() => new Date()),
@@ -80,6 +82,31 @@ export const application = sqliteTable(
 		unique('enr_application_person_term_uq').on(t.personId, t.termId),
 		index('enr_application_status_idx').on(t.termId, t.status)
 	]
+);
+
+export const REQUIREMENT_KINDS = [
+	'SF9',
+	'PSA_BIRTH_CERT',
+	'GOOD_MORAL',
+	'ID_PHOTO',
+	'SF10'
+] as const;
+
+/**
+ * Original hardcopies the Registrar has physically received (CHED audit). A missing row means
+ * "not yet received". Separate from uploads: a student may upload a photo and still owe the original.
+ */
+export const requirement = sqliteTable(
+	'enr_requirement',
+	{
+		applicationId: text('application_id')
+			.notNull()
+			.references(() => application.id),
+		kind: text('kind', { enum: REQUIREMENT_KINDS }).notNull(),
+		receivedAt: integer('received_at', { mode: 'timestamp_ms' }).notNull(),
+		receivedBy: text('received_by').notNull() // sys_user.id
+	},
+	(t) => [primaryKey({ columns: [t.applicationId, t.kind] })]
 );
 
 /** Uploaded document metadata. Files live on disk (UPLOAD_DIR), never as SQLite blobs. */

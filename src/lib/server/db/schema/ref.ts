@@ -7,6 +7,8 @@ export const program = sqliteTable('ref_program', {
 	name: text('name').notNull(),
 	copcNo: text('copc_no'), // CHED Certificate of Program Compliance
 	normalYears: integer('normal_years').notNull(), // RA 10931 Maximum Residency = normalYears + 1
+	// RA 10931 Free Higher Education applies only to CHED-recognized programs of the LUC.
+	fheEligible: integer('fhe_eligible', { mode: 'boolean' }).notNull().default(true),
 	active: integer('active', { mode: 'boolean' }).notNull().default(true)
 });
 

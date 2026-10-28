@@ -7,11 +7,19 @@
 
 	let { data, children }: LayoutProps = $props();
 
-	const links = [
+	const allLinks: { href: string; label: string; exact?: boolean; roles?: string[] }[] = [
 		{ href: '/staff', label: 'Dashboard', exact: true },
-		{ href: '/staff/applications', label: 'Applications' },
+		{ href: '/staff/applications', label: 'Applications', roles: ['REGISTRAR', 'DEAN', 'CASHIER'] },
+		{ href: '/staff/cashier', label: 'Cashier', roles: ['CASHIER'] },
 		{ href: '/staff/classes', label: 'Classes & slots' }
 	];
+
+	// Show only what this account can open (ADMIN sees everything). The server still checks.
+	let links = $derived(
+		allLinks.filter(
+			(l) => !l.roles || data.user?.roles.some((r) => r === 'ADMIN' || l.roles!.includes(r))
+		)
+	);
 
 	const isCurrent = (href: string, exact = false) =>
 		exact ? page.url.pathname === href : page.url.pathname.startsWith(href);

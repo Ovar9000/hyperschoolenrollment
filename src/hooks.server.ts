@@ -16,7 +16,7 @@ export const init: ServerInit = () => {
 };
 
 // Routes whose HTML contains personal data: never cached by browsers, proxies or the service worker.
-const PRIVATE_PREFIXES = ['/enroll', '/api/', '/staff'];
+const PRIVATE_PREFIXES = ['/enroll', '/status', '/api/', '/staff'];
 // Staff pages reachable without a session.
 const PUBLIC_STAFF_PATHS = ['/staff/login'];
 const PASSWORD_PATH = '/staff/account/password';

@@ -57,6 +57,7 @@ Then sign in at http://localhost:5173/staff.
 | `npm run verify`      | **Run before every commit:** type-check + Svelte 5 guard + build + budget |
 | `npm run check`       | `svelte-check` + `scripts/guard-svelte5.mjs` (bans Svelte 4 / Kit 2 code) |
 | `npm run budget`      | Boots the build and measures real per-route JS/CSS                        |
+| `npm run test:e2e`    | Full enrollment lifecycle over HTTP on a throwaway database (30 checks)   |
 | `npm run db:generate` | Create a migration after editing `src/lib/server/db/schema/*.ts`          |
 | `npm run db:migrate`  | Apply migrations without starting the server (FK-safe runner)             |
 | `npm run db:seed`     | Demo term, subjects, curricula, sections, classes (idempotent)            |
@@ -91,21 +92,21 @@ plain-HTTP testing on your laptop, use `npm run dev` or `npm run preview`.
 
 See [docs/scope.md](docs/scope.md) for the full phase plan.
 
-**Done (Phase 0 + 1a):**
+**Done (Phases 0, 1a, 1b):**
 
-- Student intake: mobile form, consent + guardian attestation, LRN dedupe, one-tap block enrollment
-  into the section **and all its classes** (tested: 12 concurrent submits against 2 seats and a
-  1-seat class → exact counts, no half-taken blocks).
-- Records backbone: subjects + prerequisites, curriculum versions, class offerings with schedule,
-  room, professor and seat caps, student record table, staff accounts with roles.
-- Staff area (`/staff`, PC-first): sign-in with scrypt + server sessions + lockout, forced
-  temporary-password change, dashboard, application queue with search, application detail
-  (audit-logged), classes & slots.
-- Event feed + person API, append-only audit/event logs, service worker.
+- Student intake (mobile form, consent, LRN dedupe, one-tap block enrollment into the section and
+  all its classes) and student status lookup with printable Assessment Slip / COR.
+- Records backbone: subjects, curricula, class offerings with schedule, room, professor and seats,
+  student record + student numbers, staff accounts with roles.
+- Enrollment processing: Registrar accepts, places students in sections, checks off original
+  documents, issues the assessment (RA 10931 FHE rules); Cashier records the OR (or confirms ₱0)
+  → OFFICIAL with a student number; cancel releases seats. Every step is race-safe, evented and
+  audit-logged.
+- `npm run test:e2e`: 30 lifecycle checks over real HTTP, including a 3-way payment race.
 
-**Next (Phase 1b, enrollment processing):** requirements/hardcopy checklist, section assignment for
-irregular and unseated students, status changes with history, fees + assessment (RA 10931 FHE),
-Cashier OR encoding → OFFICIAL + student number, printable COR, student status lookup.
+**Next (Phase 2):** class offerings management screens (sections, schedules, rooms, faculty load,
+fee schedule), irregular students picking subjects with clash/prerequisite/unit checks, CHED
+Enrollment List export, Admin screens for staff accounts.
 
 **Known limits:** client IPs in the audit log show `127.0.0.1` for Cloudflare Tunnel traffic until
 Caddy is configured to trust `CF-Connecting-IP`. Dev-only tooling (drizzle-kit) has `npm audit`

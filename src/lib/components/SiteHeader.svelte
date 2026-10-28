@@ -6,6 +6,7 @@
 
 	const links = [
 		{ href: '/enroll', label: 'Enroll' },
+		{ href: '/status', label: 'Check status' },
 		{ href: '/privacy', label: 'Privacy' }
 	];
 </script>
