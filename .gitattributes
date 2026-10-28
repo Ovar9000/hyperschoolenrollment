@@ -1,0 +1,3 @@
+# Keep LF everywhere (Prettier expects it; production is Linux).
+* text=auto eol=lf
+*.svg text eol=lf

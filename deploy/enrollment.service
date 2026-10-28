@@ -1,0 +1,25 @@
+# /etc/systemd/system/enrollment.service
+# sudo systemctl daemon-reload && sudo systemctl enable --now enrollment
+[Unit]
+Description=College enrollment (SvelteKit + SQLite)
+After=network.target
+
+[Service]
+Type=simple
+User=enrollment
+WorkingDirectory=/opt/enrollment
+ExecStart=/usr/bin/node --env-file=/opt/enrollment/.env build
+Restart=on-failure
+# SIGTERM → adapter-node graceful shutdown → hooks.server.ts checkpoints and closes SQLite.
+KillSignal=SIGTERM
+TimeoutStopSec=40
+# Hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/enrollment/data
+PrivateTmp=true
+MemoryMax=512M
+
+[Install]
+WantedBy=multi-user.target

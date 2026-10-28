@@ -1,0 +1,115 @@
+/* Global styles. System fonts only: zero font downloads. Keep this file small. */
+:root {
+	--fg: #1a1a1a;
+	--muted: #5c5c5c;
+	--bg: #ffffff;
+	--surface: #f3f5f8;
+	--accent: #0b4f9c;
+	--danger: #b3261e;
+	--ok: #1e6b35;
+	--radius: 10px;
+	color-scheme: light dark;
+	font-family:
+		system-ui,
+		-apple-system,
+		'Segoe UI',
+		Roboto,
+		sans-serif;
+	line-height: 1.5;
+	color: var(--fg);
+	background: var(--bg);
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--fg: #ececec;
+		--muted: #a8a8a8;
+		--bg: #121417;
+		--surface: #1e2227;
+		--accent: #7fb2ff;
+		--danger: #ffb4ab;
+		--ok: #8fd6a0;
+	}
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	background: var(--bg);
+}
+
+main {
+	max-width: 36rem;
+	margin: 0 auto;
+	padding: 1rem;
+}
+
+h1 {
+	font-size: 1.5rem;
+	line-height: 1.25;
+}
+
+a {
+	color: var(--accent);
+}
+
+label {
+	display: block;
+	font-weight: 600;
+	margin-top: 1rem;
+}
+
+input,
+select,
+button {
+	font: inherit;
+	width: 100%;
+	min-height: 48px; /* comfortable touch target */
+	padding: 0.5rem 0.75rem;
+	border: 1px solid var(--muted);
+	border-radius: var(--radius);
+	background: var(--bg);
+	color: var(--fg);
+}
+
+input[type='checkbox'],
+input[type='radio'] {
+	width: auto;
+	min-height: auto;
+}
+
+button {
+	margin-top: 1.5rem;
+	background: var(--accent);
+	color: var(--bg);
+	border: none;
+	font-weight: 700;
+}
+
+button:disabled {
+	opacity: 0.6;
+}
+
+.hint {
+	color: var(--muted);
+	font-size: 0.875rem;
+	margin: 0.25rem 0 0;
+}
+
+.error {
+	color: var(--danger);
+	font-size: 0.875rem;
+	margin: 0.25rem 0 0;
+}
+
+.card {
+	background: var(--surface);
+	border-radius: var(--radius);
+	padding: 1rem;
+	margin-top: 1rem;
+}

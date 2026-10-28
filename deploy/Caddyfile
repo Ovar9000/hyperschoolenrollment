@@ -1,0 +1,26 @@
+# Caddy in front of the Node server. Gives the LAN (split-DNS) path a real TLS certificate and
+# brotli/zstd, and HTTP/2+3. Cloudflare Tunnel also points here, so both paths behave identically.
+#
+# The certificate comes from Let's Encrypt via the DNS-01 challenge, so it works even though the box
+# has no public IP. Needs a Caddy build with the Cloudflare DNS module:
+#   xcaddy build --with github.com/caddy-dns/cloudflare
+# and a Cloudflare API token (Zone:DNS:Edit) in CF_API_TOKEN.
+
+enroll.college.edu.ph {
+	tls {
+		dns cloudflare {env.CF_API_TOKEN}
+	}
+
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		-Server
+	}
+
+	# Hashed build assets never change: cache for a year.
+	@immutable path /_app/immutable/*
+	header @immutable Cache-Control "public, max-age=31536000, immutable"
+
+	reverse_proxy 127.0.0.1:3000
+}
